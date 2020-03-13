@@ -10,8 +10,10 @@ import Chooser from './screens/Chooser';
 import Login from './screens/Login';
 import Register from './screens/Register';
 import {Provider, useSelector} from 'react-redux';
-import store, {RootState} from './store';
+import {persistor, RootState, store} from './store';
 import Home from './screens/Home';
+import {PersistGate} from 'redux-persist/integration/react';
+import SplashScreen from './screens/SplashScreen';
 
 export type RootStackParamList = {
   Chooser: undefined;
@@ -29,13 +31,13 @@ const App = () => {
     <NavigationContainer>
       {token.length === 0 ? (
         <UserStack.Navigator>
-          <UserStack.Screen name="Chooser" component={Chooser}/>
-          <UserStack.Screen name="Login" component={Login}/>
-          <UserStack.Screen name="Register" component={Register}/>
+          <UserStack.Screen name="Chooser" component={Chooser} />
+          <UserStack.Screen name="Login" component={Login} />
+          <UserStack.Screen name="Register" component={Register} />
         </UserStack.Navigator>
       ) : (
         <AppStack.Navigator>
-          <AppStack.Screen name="Home" component={Home}/>
+          <AppStack.Screen name="Home" component={Home} />
         </AppStack.Navigator>
       )}
     </NavigationContainer>
@@ -44,6 +46,8 @@ const App = () => {
 
 export default () => (
   <Provider store={store}>
-    <App/>
+    <PersistGate loading={<SplashScreen />} persistor={persistor}>
+      <App />
+    </PersistGate>
   </Provider>
 );
