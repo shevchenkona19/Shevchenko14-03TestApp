@@ -16,38 +16,57 @@ import {
 } from 'native-base';
 import Styles from '../res/styles';
 import {useInput} from '../hooks/useInput';
-import {login} from '../store/user/thunks';
-import {useDispatch, useSelector} from 'react-redux';
-import {LoginStore} from '../store/user/types';
-import {RootState} from '../store';
 import {StackNavigationProp} from '@react-navigation/stack';
-import {RootStackParamList} from '../App';
+import {fetchLogin} from '../utils/api/user';
+import {RouteProp} from '@react-navigation/native';
+import {RootLoginStackParamList} from '../navigators/LoginNavigator';
 
 type LoginScreenNavigationProp = StackNavigationProp<
-  RootStackParamList,
+  RootLoginStackParamList,
   'Login'
 >;
+type LoginScreenRouteProp = RouteProp<RootLoginStackParamList, 'Login'>;
 
 type Props = {
   navigation: LoginScreenNavigationProp;
+  route: LoginScreenRouteProp;
 };
+
+interface LoginData {
+  status: 'ok' | 'error';
+  user_id: number | undefined;
+  token: string | undefined;
+  code: string | undefined;
+  message: string | undefined;
+}
 
 export default (props: Props) => {
   const {value: username, setValue: setUsername} = useInput('');
   const {value: password, setValue: setPassword} = useInput('');
   const [isLoading, setLoading] = useState(false);
-  const state = useSelector<RootState, LoginStore>(store => store.user.login);
-  const dispatch = useDispatch();
 
-  if (state.isError && isLoading) {
-    Alert.alert('Oops!', state.errorMessage);
-    setLoading(false);
-  }
+  const login = () => {
+    setLoading(true);
+    fetchLogin(username, password)
+      .then<LoginData>(res => res.json())
+      .then(json => {
+        setLoading(false);
+        if (json.status === 'ok') {
+          props.route.params.setToken(true, json.token as string, json.user_id);
+        } else if (json.status === 'error') {
+          Alert.alert('Oops!', json.message as string);
+        }
+      })
+      .catch(e => {
+        setLoading(false);
+        console.error(e);
+        Alert.alert('Oops!', 'Something went wrong...');
+      });
+  };
 
   const onSubmit = () => {
     if (username.length > 0 && password.length > 0) {
-      setLoading(true);
-      dispatch(login(username, password));
+      login();
     } else {
       Alert.alert('Please, input username and password');
     }

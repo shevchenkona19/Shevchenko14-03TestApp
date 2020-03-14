@@ -16,15 +16,12 @@ import {
 import {Alert, StyleSheet, View} from 'react-native';
 import Styles from '../res/styles';
 import {useInput} from '../hooks/useInput';
-import {register} from '../store/user/thunks';
-import {useDispatch, useSelector} from 'react-redux';
-import {RootState} from '../store';
-import {RegisterStore} from '../store/user/types';
 import {StackNavigationProp} from '@react-navigation/stack';
-import {RootStackParamList} from '../App';
+import {fetchRegister} from '../utils/api/user';
+import {RootLoginStackParamList} from '../navigators/LoginNavigator';
 
 type RegisterScreenNavigationProp = StackNavigationProp<
-  RootStackParamList,
+  RootLoginStackParamList,
   'Register'
 >;
 
@@ -32,31 +29,41 @@ type Props = {
   navigation: RegisterScreenNavigationProp;
 };
 
+interface RegisterData {
+  status: 'ok' | 'error';
+  code: string | undefined;
+  message: string | undefined;
+}
+
 export default (props: Props) => {
   const {value: username, setValue: setUsername} = useInput('');
   const {value: password, setValue: setPassword} = useInput('');
   const [isLoading, setLoading] = useState(false);
-  const dispatch = useDispatch();
-  const state = useSelector<RootState, RegisterStore>(
-    store => store.user.register,
-  );
 
-  if (state.isError && isLoading) {
-    Alert.alert('Oops!', state.errorMessage);
-    setLoading(false);
-  }
-
-  if (!state.isError && isLoading && state.status === 'ok') {
-    setLoading(false);
-    Alert.alert('Success!', 'Please, log in now', [
-      {text: 'Ok', onPress: () => props.navigation.navigate('Login')},
-    ]);
-  }
+  const register = () => {
+    fetchRegister(username, password)
+      .then(res => res.json())
+      .then((json: RegisterData) => {
+        setLoading(false);
+        if (json.status === 'ok') {
+          Alert.alert('Success!', 'Please, log in now', [
+            {text: 'Ok', onPress: () => props.navigation.navigate('Login')},
+          ]);
+        } else if (json.status === 'error') {
+          Alert.alert('Oops!', json.message as string);
+        }
+      })
+      .catch(e => {
+        setLoading(false);
+        console.error(e);
+        Alert.alert('Oops!', 'Something went wrong...');
+      });
+  };
 
   const onSubmit = () => {
     if (username.length > 0 && password.length > 0) {
       setLoading(true);
-      dispatch(register(username, password));
+      register();
     } else {
       Alert.alert('Please, input username and password');
     }
