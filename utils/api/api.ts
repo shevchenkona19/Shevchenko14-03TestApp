@@ -1,4 +1,8 @@
-export const SERVER_URL = 'http://192.168.1.21:3000';
+import {Platform} from 'react-native';
+
+export const SERVER_URL = `http://${
+  Platform.OS === 'ios' ? 'localhost' : '192.168.0.2'
+}:3000`;
 
 interface Options {
   method: 'POST' | 'PUT' | 'DELETE' | 'GET';
