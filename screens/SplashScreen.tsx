@@ -1,6 +1,5 @@
 import {StyleSheet} from 'react-native';
 import React from 'react';
-import Styles from '../res/styles';
 import {Container, Content, Text} from 'native-base';
 
 export default () => {
@@ -18,7 +17,10 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   appName: {
-    ...Styles.header,
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginTop: 16,
+    marginStart: 16,
     flex: 1,
     textAlign: 'center',
   },

@@ -14,8 +14,6 @@ import {
   Spinner,
   Text,
 } from 'native-base';
-import Styles from '../res/styles';
-import {useInput} from '../hooks/useInput';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {fetchLogin} from '../utils/api/user';
 import {RouteProp} from '@react-navigation/native';
@@ -41,8 +39,8 @@ interface LoginData {
 }
 
 export default (props: Props) => {
-  const {value: username, setValue: setUsername} = useInput('');
-  const {value: password, setValue: setPassword} = useInput('');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [isLoading, setLoading] = useState(false);
 
   const login = () => {
@@ -126,7 +124,6 @@ export default (props: Props) => {
 const styles = StyleSheet.create({
   content: {
     flex: 1,
-    alignItems: 'center',
   },
   field: {
     marginVertical: 16,
@@ -136,17 +133,19 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   header: {
-    ...Styles.header,
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginTop: 16,
+    marginStart: 16,
+    textAlign: 'left',
   },
   button: {
     marginVertical: 10,
     marginHorizontal: 16,
   },
   bottom: {
-    ...Styles.bottom,
-    marginBottom: 36,
-  },
-  content: {
     flex: 1,
+    justifyContent: 'flex-end',
+    marginBottom: 36,
   },
 });

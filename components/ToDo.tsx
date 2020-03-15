@@ -1,7 +1,6 @@
 import React from 'react';
 import {View, StyleSheet, TouchableOpacity, Text} from 'react-native';
 import {toDoType} from '../queries/todos';
-import {CheckBox} from 'native-base';
 
 type Props = {
   node: toDoType;

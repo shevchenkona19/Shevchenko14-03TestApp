@@ -1,12 +1,11 @@
 import React from 'react';
 import {StyleSheet, View} from 'react-native';
 import {StackNavigationProp} from '@react-navigation/stack';
-import {RootStackParamList} from '../App';
 import {Button, Container, Content, Text} from 'native-base';
-import Styles from '../res/styles';
+import {RootLoginStackParamList} from '../navigators/LoginNavigator';
 
 type ProfileScreenNavigationProp = StackNavigationProp<
-  RootStackParamList,
+  RootLoginStackParamList,
   'Chooser'
 >;
 
@@ -40,14 +39,19 @@ export default (props: Props) => {
 
 const styles = StyleSheet.create({
   header: {
-    ...Styles.header,
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginTop: 16,
+    marginStart: 16,
+    textAlign: 'left',
   },
   button: {
     marginVertical: 10,
     marginHorizontal: 16,
   },
   bottom: {
-    ...Styles.bottom,
+    flex: 1,
+    justifyContent: 'flex-end',
     marginBottom: 36,
   },
   content: {

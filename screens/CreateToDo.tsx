@@ -17,9 +17,8 @@ import {RootMainStackParamList} from '../navigators/MainNavigator';
 import {
   CREATE_TO_DO,
   createToDosTypes,
-  createToDosVarsTypes, createToDoUpdate,
-  GET_TODOS,
-  getToDosType,
+  createToDosVarsTypes,
+  createToDoUpdate,
 } from '../queries/todos';
 import {getUserId} from '../utils/token';
 import getRandomNumber from '../utils/rnd';
@@ -39,16 +38,22 @@ export default (props: Props) => {
     createToDosTypes,
     createToDosVarsTypes
   >(CREATE_TO_DO, {
+    context: {
+      tracked: true,
+      serializationKey: 'TO-DO',
+    },
     update: createToDoUpdate,
   });
 
   const onSubmit = async () => {
     const userId = await getUserId();
+    const id = getRandomNumber(0, 500000);
     createToDo({
       variables: {
         title,
         description,
         userId,
+        id,
       },
       optimisticResponse: {
         __typename: 'Mutation',
@@ -61,11 +66,11 @@ export default (props: Props) => {
             createdAt: new Date().toISOString(),
             isDone: false,
             userId,
-            id: getRandomNumber(0, 5000000)
-          }
-        }
-      }
-    })
+            id,
+          },
+        },
+      },
+    });
     props.navigation.goBack();
   };
 

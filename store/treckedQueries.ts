@@ -33,10 +33,6 @@ export type TrackedQueriesActionType =
   | TrackedQueriesRemove
   | TrackedQueriesClear;
 
-export interface State {
-  trackedQueries: TrackedQueriesState;
-}
-
 // ACTION CREATORS
 export const trackedQueriesAdd = (
   trackedQuery: TrackedQuery,
@@ -61,7 +57,7 @@ interface TrackedQueriesById {
 
 type TrackedQueriesIds = string[];
 
-export interface TrackedQueriesState {
+export interface State {
   byId: TrackedQueriesById;
   ids: TrackedQueriesIds;
 }
@@ -116,12 +112,12 @@ export default combineReducers({
 });
 
 // SELECTORS
-const getTrackedQueriesIds = (state: State) => state.trackedQueries.ids;
+const getTrackedQueriesIds = (state: State) => state.ids;
 
-const getTrackedQueriesById = (state: State) => state.trackedQueries.byId;
+const getTrackedQueriesById = (state: State) => state.byId;
 
-// export const getTrackedQueries = createSelector(
-//   getTrackedQueriesIds,
-//   getTrackedQueriesById,
-//   (pIds, pById) => pIds.map(o => pById[o]),
-// );
+export const getTrackedQueries = createSelector(
+  getTrackedQueriesIds,
+  getTrackedQueriesById,
+  (pIds, pById) => pIds.map(o => pById[o]),
+);

@@ -1,7 +1,6 @@
 import {SectionList, StyleSheet, View} from 'react-native';
 import {Fab, Icon, Spinner, Text} from 'native-base';
 import React from 'react';
-import Styles from '../res/styles';
 import {useMutation, useQuery} from '@apollo/react-hooks';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {RootMainStackParamList} from '../navigators/MainNavigator';
@@ -15,8 +14,10 @@ import {
 } from '../queries/todos';
 import ToDo from '../components/ToDo';
 
-type HomeScreenNavigationProp = StackNavigationProp<RootMainStackParamList,
-  'Home'>;
+type HomeScreenNavigationProp = StackNavigationProp<
+  RootMainStackParamList,
+  'Home'
+>;
 type Props = {
   navigation: HomeScreenNavigationProp;
 };
@@ -28,9 +29,15 @@ type Section = {
 
 export default (props: Props) => {
   const {data, loading} = useQuery<getToDosType>(GET_TODOS);
-  const [updateToDo] = useMutation<updateTaskByIdTypes, updateTaskByIdVarsTypes>(
-    UPDATE_TO_DO,
-  );
+  const [updateToDo] = useMutation<
+    updateTaskByIdTypes,
+    updateTaskByIdVarsTypes
+  >(UPDATE_TO_DO, {
+    context: {
+      tracked: true,
+      serializationKey: 'TO-DO',
+    },
+  });
 
   const handleClick = (node: toDoType) => {
     updateToDo({
@@ -51,7 +58,7 @@ export default (props: Props) => {
             __typename: node.__typename,
           },
           __typename: 'UpdateTaskPayload',
-        }
+        },
       },
     }).then(() => {});
   };
@@ -78,24 +85,34 @@ export default (props: Props) => {
       <Text style={styles.header}>Welcome!</Text>
       {loading ? (
         <View>
-          <Spinner/>
+          <Spinner />
         </View>
       ) : (
         <View style={styles.container}>
-          {data && data.allTasks && data.allTasks.nodes && data.allTasks.nodes.length > 0 ?
-          <SectionList<toDoType>
-            style={styles.list}
-            sections={sections}
-            renderItem={({item}) => <ToDo node={item} onClick={handleClick}/>}
-            keyExtractor={node => node.id.toString(10)}
-            renderSectionHeader={({section: {title}}) => (
-              <Text style={styles.sectionHeader}>{title}</Text>
-            )}
-          />: <Text>Poor thing... There is nothing here. Go create some tasks!</Text>}
+          {data &&
+          data.allTasks &&
+          data.allTasks.nodes &&
+          data.allTasks.nodes.length > 0 ? (
+            <SectionList<toDoType>
+              style={styles.list}
+              sections={sections}
+              renderItem={({item}) => (
+                <ToDo node={item} onClick={handleClick} />
+              )}
+              keyExtractor={node => node.id.toString(10)}
+              renderSectionHeader={({section: {title}}) => (
+                <Text style={styles.sectionHeader}>{title}</Text>
+              )}
+            />
+          ) : (
+            <Text style={styles.placeholder}>
+              Poor thing... There is nothing here. Go create some tasks!
+            </Text>
+          )}
           <Fab
             position="bottomRight"
             onPress={() => props.navigation.navigate('CreateToDo')}>
-            <Icon name="add"/>
+            <Icon name="add" />
           </Fab>
         </View>
       )}
@@ -108,7 +125,10 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    ...Styles.header,
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginTop: 16,
+    marginStart: 16,
     textAlign: 'left',
   },
   list: {
@@ -119,5 +139,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#fcfcfc',
     paddingStart: 24,
     paddingVertical: 4,
+  },
+  placeholder: {
+    marginStart: 16,
   },
 });
