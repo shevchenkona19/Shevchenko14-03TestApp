@@ -12,11 +12,13 @@ import QueueLink from 'apollo-link-queue';
 import {NormalizedCacheObject} from 'apollo-cache-inmemory';
 import {PersistedData, PersistentStorage} from 'apollo-cache-persist/types';
 import trackerLink from '../apollo/links/trackerLink';
-import store from "../store";
-import {SERVER_URL} from "../utils/api/api";
+import store from '../store';
+import {SERVER_URL} from '../utils/api/api';
+import apolloLogger from 'apollo-link-logger';
 
 const httpLink = new HttpLink({uri: SERVER_URL + '/graphql'});
 const retry = new RetryLink({attempts: {max: Infinity}});
+
 export const queueLink = new QueueLink();
 const serialize = new SerializingLink();
 const authLink = setContext(async (req, {headers}) => {
@@ -30,7 +32,15 @@ const authLink = setContext(async (req, {headers}) => {
   };
 });
 
-const link = ApolloLink.from([authLink, queueLink, serialize, trackerLink(store.dispatch), retry, httpLink]);
+const link = ApolloLink.from([
+  apolloLogger,
+  authLink,
+  trackerLink(store.dispatch),
+  queueLink,
+  serialize,
+  retry,
+  httpLink,
+]);
 
 const cache = new InMemoryCache();
 

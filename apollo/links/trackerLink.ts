@@ -10,7 +10,9 @@ import {
 
 export default (dispatch: Dispatch<TrackedQueriesActionType>) =>
   new ApolloLink((operation, forward) => {
+    console.log(operation.operationName);
     if (forward === undefined) {
+      console.log('forward null');
       return null;
     }
     const name: string = operation.operationName;

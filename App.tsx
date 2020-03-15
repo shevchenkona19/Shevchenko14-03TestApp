@@ -13,19 +13,17 @@ import LoginNavigator from './navigators/LoginNavigator';
 import MainNavigator from './navigators/MainNavigator';
 import {options, persistCachePromise, queueLink} from './apollo';
 import ApolloClient from 'apollo-client';
-import NetInfo from '@react-native-community/netinfo';
 import {GET_TODOS} from './queries/todos';
 import {PersistGate} from 'redux-persist/integration/react';
 import {Provider, useDispatch, useSelector} from 'react-redux';
 import store, {persistor} from './store';
 import {
   getTrackedQueries,
-  State,
   trackedQueriesClear,
   trackedQueriesRemove,
 } from './store/treckedQueries';
 import {updateHandlerByName} from './queries';
-import {createSelector} from 'reselect';
+import useNetInfo from './hooks/useNetInfo';
 
 let client: any;
 
@@ -33,39 +31,11 @@ const App = () => {
   const [isLogin, setLogged] = useState(false);
   const [isLoading, setLoading] = useState(true);
   const [isHydrated, setHydrated] = useState(false);
-  const [online, setOnline] = useState(true);
-  const dispatch = useDispatch();
-
-  const trackedQueries = useSelector((state: State) => {
-    if (state.trackedQueries) {
-      const trackedQueriesIds = state.trackedQueries.ids;
-      const trackedQueriesById = state.trackedQueries.byId;
-      return trackedQueriesIds.map(o => trackedQueriesById[o]);
-    } else {
-      return [];
-    }
-  });
   const [trackedLoaded, setTrackedLoaded] = useState(false);
-
-  useEffect(() => {
-    const unsubscribe = NetInfo.addEventListener(state => {
-      const isInetReachable = state.isInternetReachable;
-      if (isInetReachable === null) {
-        return;
-      }
-      if (isInetReachable === undefined) {
-        return;
-      }
-
-      if (isInetReachable) {
-        queueLink.open();
-      } else {
-        queueLink.close();
-      }
-      setOnline(isInetReachable);
-    });
-    return () => unsubscribe();
-  }, []);
+  const [onlineQueryLoaded, setOnlineQueryLoaded] = useState(false);
+  const trackedQueries = useSelector(getTrackedQueries);
+  const online = useNetInfo(queueLink);
+  const dispatch = useDispatch();
 
   const setToken = (
     loggedIn: boolean,
@@ -105,6 +75,7 @@ const App = () => {
       client = new ApolloClient({...options});
       setHydrated(true);
       const promises: Array<Promise<any>> = [];
+      console.log(trackedQueries);
       trackedQueries.forEach(trackedQuery => {
         const context = JSON.parse(trackedQuery.contextJSON);
         const query = JSON.parse(trackedQuery.queryJSON);
@@ -120,7 +91,6 @@ const App = () => {
         );
         dispatch(trackedQueriesRemove(trackedQuery.id));
       });
-      setTrackedLoaded(true);
       if (online) {
         try {
           await Promise.all(promises);
@@ -136,11 +106,22 @@ const App = () => {
           console.log('error', e);
         }
       }
+      setOnlineQueryLoaded(true);
+      setTrackedLoaded(true);
     };
     execute();
   }, [dispatch, online, trackedQueries]);
 
-  if (isLoading || !isHydrated || !trackedLoaded) {
+  useEffect(() => {
+    if (online) {
+      client.query({
+        fetchPolicy: 'network-only',
+        query: GET_TODOS,
+      });
+    }
+  }, [online]);
+
+  if (isLoading || !isHydrated || !trackedLoaded || !onlineQueryLoaded) {
     return <SplashScreen />;
   }
   return (
