@@ -6,5 +6,5 @@ interface UpdateHandlerByName {
 }
 
 export const updateHandlerByName: UpdateHandlerByName = {
-  createTodo: createToDoUpdate,
+  createToDo: createToDoUpdate,
 };

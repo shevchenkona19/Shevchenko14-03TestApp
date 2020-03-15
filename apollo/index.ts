@@ -3,7 +3,7 @@ import {setContext} from 'apollo-link-context';
 import {getToken} from '../utils/token';
 import {ApolloLink} from 'apollo-link';
 import SerializingLink from 'apollo-link-serialize';
-import {typeDefs} from '../resolvers';
+import {typeDefs} from '../gqltypes';
 import {RetryLink} from 'apollo-link-retry';
 import {InMemoryCache} from 'apollo-cache-inmemory';
 import {persistCache} from 'apollo-cache-persist';

@@ -49,11 +49,11 @@ export interface createToDosVarsTypes {
   title: string;
   description: string;
   userId: number;
+  id: number;
 }
 
 export const CREATE_TO_DO = gql`
-  mutation createToDo($title: String!, $description: String!, $userId: Int!)
-    @serialize(key: ["to-do"]) {
+  mutation createToDo($title: String!, $description: String!, $userId: Int!) {
     createTask(
       input: {task: {title: $title, description: $description, userId: $userId}}
     ) {
@@ -74,20 +74,20 @@ export const CREATE_TO_DO = gql`
 export const createToDoUpdate: MutationUpdaterFn<createToDosTypes> = (
   cache,
     {
-      data: {
-        createTask: {
-          task
-        },
-      },
+      data,
     },
 ) => {
-  const data = cache.readQuery<getToDosType>({query: GET_TODOS});
+  if (data === undefined|| data === null || data.createTask === undefined || data.createTask === null) {
+    return;
+  }
+  const {task} = data.createTask;
+  const cacheData = cache.readQuery<getToDosType>({query: GET_TODOS});
   cache.writeQuery({
     query: GET_TODOS,
     data: {
       allTasks: {
-        nodes: data?.allTasks.nodes.concat([task]),
-        __typename: data?.allTasks.__typename,
+        nodes: cacheData?.allTasks.nodes.concat([task]),
+        __typename: cacheData?.allTasks.__typename,
       },
       __typename: data?.__typename,
     },
@@ -108,8 +108,7 @@ export interface updateTaskByIdTypes {
 }
 
 export const UPDATE_TO_DO = gql`
-  mutation updateTaskById($isDone: Boolean!, $id: Int!)
-    @serialize(key: ["to-do"]) {
+  mutation updateTaskById($isDone: Boolean!, $id: Int!) {
     updateTaskById(input: {taskPatch: {isDone: $isDone}, id: $id}) {
       task {
         createdAt
